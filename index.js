@@ -77,6 +77,8 @@ let canvas = d3.select("#canvas");
 canvas.attr('width', width);
 canvas.attr('height', height);
 
+let tooltip = d3.select('#tooltip');
+
 let generateScales = () => {
   xScale = d3.scaleBand()
     .domain(cellDatas.map((cellData) => cellData[Object.keys(cellData)[1]]))
@@ -92,6 +94,19 @@ let drawCells = () => {
     .data(cellDatas)
     .enter()
     .append('rect')
+    .on('mouseover', (cellData) => {
+      tooltip.transition()
+        .style('visibility', 'visible');
+
+      console.log(cellData);
+      console.log(cellData.value);
+
+      tooltip.text(`${cellData.rowKey}\n${cellData.columnKey}\n${cellData.value}`);
+    })
+    .on('mouseout', (cellData) => {
+      tooltip.transition()
+        .style('visibility', 'hidden');
+    })
     .attr('class', 'cell')
     .attr('data-x', (cellData) => {
       return cellData.columnKey;

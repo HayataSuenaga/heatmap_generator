@@ -15,3 +15,7 @@ body {
   /* min-height: 600px;
   min-width: 1200px; */
 }
+
+#tooltip {
+  visibility: hidden;
+}
