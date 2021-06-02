@@ -2,7 +2,7 @@ let selectedFile;
 let fileURL;
 
 let rowDatas;
-let cellDatas = [];
+let cellDatas;
 let minValue;
 let maxValue;
 
@@ -22,6 +22,7 @@ canvas.attr('height', height);
 let tooltip = d3.select('#tooltip');
 
 let getCellDatas = () => {
+  cellDatas = [];
   rowDatas.forEach((rowData) => {
     let keys = Object.keys(rowData);
     for (let i = 1; i < keys.length; i++) {
@@ -32,11 +33,6 @@ let getCellDatas = () => {
       cellDatas.push(cellData);
     }
   });
-};
-
-let getCellDimensions = () => {
-  const cellWidth = (width - (2 * padding)) / (Object.keys(rowDatas[0]).length - 1);
-  const cellHeight = (height - (2 * padding)) / rowDatas.length;
 };
 
 let getRange = () => {
@@ -55,7 +51,7 @@ let generateScales = () => {
 
   valueScale = d3.scaleSequential()
     .domain([minValue, maxValue])
-    .interpolator(d3.interpolateRainbow);
+    .interpolator(d3.interpolateInferno);
 };
 
 let drawCells = () => {
@@ -111,16 +107,15 @@ let drawAxes = () => {
 };
 
 let generateHeatmap = () => {
+  d3.selectAll("svg > *").remove();
   getCellDatas();
-  getCellDimensions();
   getRange();
   generateScales();
-  drawCells();
   drawAxes();
+  drawCells();
 };
 
 $(document).ready(() => {
-
   $('#save').click(() => {
     selectedFile = document.getElementById('file-input').files[0];
     fileURL = window.URL.createObjectURL(selectedFile);
