@@ -3,6 +3,23 @@ let fileURL;
 
 let rowDatas;
 let cellDatas = [];
+let minValue;
+let maxValue;
+
+let xScale;
+let yScale;
+let valueScale;
+
+// set dimensions of canvus
+const width = 1200;
+const height = 600;
+const padding = 60;
+
+let canvas = d3.select("#canvas");
+canvas.attr('width', width);
+canvas.attr('height', height);
+
+let tooltip = d3.select('#tooltip');
 
 let getCellDatas = () => {
   rowDatas.forEach((rowData) => {
@@ -17,24 +34,15 @@ let getCellDatas = () => {
   });
 };
 
-let xScale;
-let yScale;
-
-// set dimensions of campus
-const width = 1200;
-const height = 600;
-const padding = 60;
-
-let canvas = d3.select("#canvas");
-canvas.attr('width', width);
-canvas.attr('height', height);
-
-let tooltip = d3.select('#tooltip');
-
 let getCellDimensions = () => {
   const cellWidth = (width - (2 * padding)) / (Object.keys(rowDatas[0]).length - 1);
   const cellHeight = (height - (2 * padding)) / rowDatas.length;
 };
+
+let getRange = () => {
+  minValue = d3.min(cellDatas, cellData => cellData.value);
+  maxValue = d3.max(cellDatas, cellData => cellData.value);
+}
 
 let generateScales = () => {
   xScale = d3.scaleBand()
@@ -44,6 +52,10 @@ let generateScales = () => {
   yScale = d3.scaleBand()
     .domain(rowDatas.map((rowData) => rowData[Object.keys(rowData)[0]]))
     .rangeRound([padding, height - padding]);
+
+  valueScale = d3.scaleSequential()
+    .domain([minValue, maxValue])
+    .interpolator(d3.interpolateRainbow);
 };
 
 let drawCells = () => {
@@ -79,15 +91,7 @@ let drawCells = () => {
       return xScale(cellData.columnKey);
     }))
     .attr('fill', (cellData) => {
-      if (cellData.value <= 25) {
-        return 'Crimson';
-      } else if (cellData.value <= 50) {
-        return 'Orange';
-      } else if (cellData.value <= 75) {
-        return 'LightSteelBlue';
-      } else {
-        return 'SteelBlue';
-      }
+      return valueScale(cellData.value);
     });
 };
 
@@ -109,6 +113,7 @@ let drawAxes = () => {
 let generateHeatmap = () => {
   getCellDatas();
   getCellDimensions();
+  getRange();
   generateScales();
   drawCells();
   drawAxes();
