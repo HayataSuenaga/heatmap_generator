@@ -1,83 +1,40 @@
-let rowDatas = [
-  {
-    studentName: "Harry",
-    Midterm1: 89,
-    Midterm2: 47,
-    Midterm3: 49,
-    Final: 90
-  },
-  {
-    studentName: "Ron",
-    Midterm1: 30,
-    Midterm2: 4,
-    Midterm3: 50,
-    Final: 80
-  },
-  {
-    studentName: "Hermione",
-    Midterm1: 100,
-    Midterm2: 99,
-    Midterm3: 97,
-    Final: 99
-  },
-  {
-    studentName: "Draco",
-    Midterm1: 78,
-    Midterm2: 53,
-    Midterm3: 51,
-    Final: 89
-  },
-  {
-    studentName: "Luna",
-    Midterm1: 4,
-    Midterm2: 34,
-    Midterm3: 20,
-    Final: 65
-  },
-  {
-    studentName: "Dobby",
-    Midterm1: 2,
-    Midterm2: 17,
-    Midterm3: 27,
-    Final: 48
-  },
-  {
-    studentName: "Narcissa",
-    Midterm1: 76,
-    Midterm2: 68,
-    Midterm3: 56,
-    Final: 93
-  }
-];
+let selectedFile;
+let fileURL;
 
+let rowDatas;
 let cellDatas = [];
 
-rowDatas.forEach((rowData) => {
-  let keys = Object.keys(rowData);
-  for (let i = 1; i < keys.length; i++) {
-    let cellData = {};
-    cellData.rowKey = rowData[keys[0]];
-    cellData.columnKey = keys[i];
-    cellData.value = rowData[keys[i]];
-    cellDatas.push(cellData);
-  }
-});
+let getCellDatas = () => {
+  rowDatas.forEach((rowData) => {
+    let keys = Object.keys(rowData);
+    for (let i = 1; i < keys.length; i++) {
+      let cellData = {};
+      cellData.rowKey = rowData[keys[0]];
+      cellData.columnKey = keys[i];
+      cellData.value = rowData[keys[i]];
+      cellDatas.push(cellData);
+    }
+  });
+};
 
 let xScale;
 let yScale;
 
-// set dimentions of campus
+// set dimensions of campus
 const width = 1200;
 const height = 600;
 const padding = 60;
-const cellWidth = (width - (2 * padding)) / (Object.keys(rowDatas[0]).length - 1);
-const cellHeight = (height - (2 * padding)) / rowDatas.length;
 
 let canvas = d3.select("#canvas");
 canvas.attr('width', width);
 canvas.attr('height', height);
 
 let tooltip = d3.select('#tooltip');
+
+let getCellDimensions = () => {
+  const cellWidth = (width - (2 * padding)) / (Object.keys(rowDatas[0]).length - 1);
+  const cellHeight = (height - (2 * padding)) / rowDatas.length;
+};
 
 let generateScales = () => {
   xScale = d3.scaleBand()
@@ -97,10 +54,6 @@ let drawCells = () => {
     .on('mouseover', (cellData) => {
       tooltip.transition()
         .style('visibility', 'visible');
-
-      console.log(cellData);
-      console.log(cellData.value);
-
       tooltip.text(`${cellData.rowKey}\n${cellData.columnKey}\n${cellData.value}`);
     })
     .on('mouseout', (cellData) => {
@@ -153,8 +106,28 @@ let drawAxes = () => {
     .attr('transform', `translate(${padding}, 0)`);
 };
 
-$(document).ready(() => {
+let generateHeatmap = () => {
+  getCellDatas();
+  getCellDimensions();
   generateScales();
   drawCells();
   drawAxes();
+};
+
+$(document).ready(() => {
+
+  $('#save').click(() => {
+    selectedFile = document.getElementById('file-input').files[0];
+    fileURL = window.URL.createObjectURL(selectedFile);
+
+    let req = new XMLHttpRequest();
+    req.open('GET', fileURL, true);
+    req.onload = () => {
+      let object = JSON.parse(req.responseText);
+      console.log(object);
+      rowDatas = object;
+      generateHeatmap();
+    };
+    req.send();
+  });
 });
