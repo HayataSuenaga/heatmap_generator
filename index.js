@@ -1,3 +1,6 @@
+// npm module for converting csv to json
+const csv = require('scvtojson');
+
 let selectedFile;
 let fileURL;
 
@@ -118,15 +121,27 @@ let generateHeatmap = () => {
 $(document).ready(() => {
   $('#save').click(() => {
     selectedFile = document.getElementById('file-input').files[0];
+    documentType = selectedFile.type.split('/').pop();
+    console.log(documentType);
     fileURL = window.URL.createObjectURL(selectedFile);
 
     let req = new XMLHttpRequest();
     req.open('GET', fileURL, true);
     req.onload = () => {
-      let object = JSON.parse(req.responseText);
-      console.log(object);
-      rowDatas = object;
-      generateHeatmap();
+      data = req.responseText;
+      if (documentType === 'csv') {
+        csv()
+        .fromString(data)
+        .then((json) => {
+          let object = JSON.parse(data);
+        rowDatas = object;
+        generateHeatmap();
+        });
+      } else {
+        let object = JSON.parse(data);
+        rowDatas = object;
+        generateHeatmap();
+      }
     };
     req.send();
   });
